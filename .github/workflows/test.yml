@@ -54,10 +54,18 @@ jobs:
           toolchain: stable
           target: wasm32-unknown-unknown
 
-      - name: Run token tests
-        run: cargo test --package orbit-haul-token -- --test-threads=1 --nocapture
-      - name: Run shipment tests
-        run: cargo test --package shipment -- --test-threads=1 --nocapture
+      - name: Run core tests
+        run: cargo test --package shipment test:: -- --test-threads=1 --nocapture
+      - name: Run e2e tests
+        run: cargo test --package shipment e2e_test:: -- --test-threads=1 --nocapture
+      - name: Run replay protection tests
+        run: cargo test --package shipment actor_quota_tests:: -- --test-threads=1 --nocapture
+      - name: Run performance tests
+        run: cargo test --package shipment test_performance:: -- --test-threads=1 --nocapture
+      - name: Run consistency tests
+        run: cargo test --package shipment test_consistency:: -- --test-threads=1 --nocapture
+      - name: Run remaining tests
+        run: cargo test --package shipment -- --test-threads=1 --nocapture --skip test:: --skip e2e_test:: --skip actor_quota_tests:: --skip test_performance:: --skip test_consistency::
 
   cargo-build:
     name: Cargo Build (Host)
