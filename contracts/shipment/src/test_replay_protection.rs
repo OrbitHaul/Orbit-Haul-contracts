@@ -152,7 +152,7 @@ mod actor_quota_tests {
             for _ in 0..config.max_operations {
                 tracker
                     .check_and_update(0, &config, 1)
-                    .expect(&format!("{} exhaustion failed", config_name));
+                    .unwrap_or_else(|_| panic!("{config_name} exhaustion failed"));
             }
 
             // Move past window and try operation
@@ -190,7 +190,7 @@ mod actor_quota_tests {
         }
 
         // Try operation just before window expires
-        let almost_expired = 0 + config.window_seconds - 1;
+        let almost_expired = config.window_seconds - 1;
         let result = tracker.check_and_update(almost_expired, &config, 1);
 
         // Should fail - window not yet expired
@@ -222,7 +222,7 @@ mod actor_quota_tests {
                 let current_time = cycle as u64 * (config.window_seconds + 1);
                 tracker
                     .check_and_update(current_time, &config, 1)
-                    .expect(&format!("cycle {} exhaustion should succeed", cycle));
+                    .unwrap_or_else(|_| panic!("cycle {cycle} exhaustion should succeed"));
             }
 
             // Verify exhausted
