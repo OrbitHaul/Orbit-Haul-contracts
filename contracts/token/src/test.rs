@@ -2,19 +2,19 @@
 
 extern crate std;
 
-use crate::{test_utils::setup_env, NavinToken, NavinTokenClient};
+use crate::{test_utils::setup_env, OrbitHaulToken, OrbitHaulTokenClient};
 use soroban_sdk::{testutils::Address as _, Address, Env, String, Symbol};
 
-fn setup_token_env() -> (Env, NavinTokenClient<'static>, Address) {
+fn setup_token_env() -> (Env, OrbitHaulTokenClient<'static>, Address) {
     let (env, admin) = setup_env();
-    let contract_id = env.register(NavinToken, ());
-    let client = NavinTokenClient::new(&env, &contract_id);
+    let contract_id = env.register(OrbitHaulToken, ());
+    let client = OrbitHaulTokenClient::new(&env, &contract_id);
 
     (env, client, admin)
 }
 
-fn initialize_token(client: &NavinTokenClient, env: &Env, admin: &Address, total_supply: i128) {
-    let name = String::from_str(env, "NavinToken");
+fn initialize_token(client: &OrbitHaulTokenClient, env: &Env, admin: &Address, total_supply: i128) {
+    let name = String::from_str(env, "OrbitHaulToken");
     let symbol = String::from_str(env, "NVN");
     client.initialize(admin, &name, &symbol, &total_supply);
 }
@@ -29,7 +29,7 @@ fn test_initialize() {
     initialize_token(&client, &env, &admin, 1_000_000);
 
     assert_eq!(client.get_admin(), admin);
-    assert_eq!(client.name(), String::from_str(&env, "NavinToken"));
+    assert_eq!(client.name(), String::from_str(&env, "OrbitHaulToken"));
     assert_eq!(client.symbol(), String::from_str(&env, "NVN"));
     assert_eq!(client.total_supply(), 1_000_000);
     assert_eq!(client.balance(&admin), 1_000_000);

@@ -1,5 +1,5 @@
 // =============================================================================
-// End-to-End Integration Test: OrbitHaulShipment + NavinToken (Real Token Contract)
+// End-to-End Integration Test: OrbitHaulShipment + OrbitHaulToken (Real Token Contract)
 //
 // Covers four lifecycle paths, all with real token balance verification:
 //   1. HAPPY PATH          — deposit → milestones (100 %) → delivery → full release
@@ -15,7 +15,7 @@
 extern crate std;
 
 use crate::{test_utils::setup_env, OrbitHaulShipment, OrbitHaulShipmentClient, ShipmentStatus};
-use navin_token::{NavinToken, NavinTokenClient};
+use orbit_haul_token::{OrbitHaulToken, OrbitHaulTokenClient};
 use soroban_sdk::{
     testutils::{Address as _, Events, Ledger as _},
     Address, BytesN, Env, FromVal, String, Symbol, Vec,
@@ -31,14 +31,14 @@ fn advance_time(env: &Env, seconds: u64) {
 }
 
 // ---------------------------------------------------------------------------
-// Helper: deploy + initialise NavinToken, giving admin the initial supply
+// Helper: deploy + initialise OrbitHaulToken, giving admin the initial supply
 // ---------------------------------------------------------------------------
-fn deploy_token<'a>(env: &'a Env, admin: &Address) -> (Address, NavinTokenClient<'a>) {
-    let token_id = env.register(NavinToken, ());
-    let token = NavinTokenClient::new(env, &token_id);
+fn deploy_token<'a>(env: &'a Env, admin: &Address) -> (Address, OrbitHaulTokenClient<'a>) {
+    let token_id = env.register(OrbitHaulToken, ());
+    let token = OrbitHaulTokenClient::new(env, &token_id);
     token.initialize(
         admin,
-        &String::from_str(env, "NavinToken"),
+        &String::from_str(env, "OrbitHaulToken"),
         &String::from_str(env, "NVN"),
         &1_000_000_i128,
     );

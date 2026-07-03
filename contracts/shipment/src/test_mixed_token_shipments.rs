@@ -22,7 +22,7 @@ use crate::{
     types::{SettlementOperation, SettlementState, ShipmentStatus},
     OrbitHaulError, OrbitHaulShipment, OrbitHaulShipmentClient,
 };
-use navin_token::NavinTokenClient;
+use orbit_haul_token::OrbitHaulTokenClient;
 use soroban_sdk::{
     testutils::Address as _, token::StellarAssetClient, Address, BytesN, Env, IntoVal, Vec,
 };
@@ -71,10 +71,10 @@ fn deploy_sac(env: &Env, admin: &Address) -> Address {
         .address()
 }
 
-/// Deploy a fresh NavinToken, initialize it, and return its address.
+/// Deploy a fresh OrbitHaulToken, initialize it, and return its address.
 fn deploy_nvn(env: &Env, admin: &Address) -> Address {
-    let addr = env.register(navin_token::NavinToken, ());
-    NavinTokenClient::new(env, &addr).initialize(
+    let addr = env.register(orbit_haul_token::OrbitHaulToken, ());
+    OrbitHaulTokenClient::new(env, &addr).initialize(
         admin,
         &soroban_sdk::String::from_str(env, "Navin Token"),
         &soroban_sdk::String::from_str(env, "NVN"),
@@ -102,9 +102,9 @@ fn mint_sac(env: &Env, token: &Address, to: &Address, amount: i128) {
     StellarAssetClient::new(env, token).mint(to, &amount);
 }
 
-/// Mint `amount` NavinToken tokens to `to` (NavinToken mint takes `(admin, to, amount)`).
+/// Mint `amount` OrbitHaulToken tokens to `to` (OrbitHaulToken mint takes `(admin, to, amount)`).
 fn mint_nvn(env: &Env, token: &Address, admin: &Address, to: &Address, amount: i128) {
-    NavinTokenClient::new(env, token).mint(admin, to, &amount);
+    OrbitHaulTokenClient::new(env, token).mint(admin, to, &amount);
 }
 
 fn balance(env: &Env, token: &Address, who: &Address) -> i128 {

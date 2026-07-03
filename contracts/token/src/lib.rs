@@ -12,10 +12,10 @@ mod test_utils;
 pub use errors::*;
 
 #[contract]
-pub struct NavinToken;
+pub struct OrbitHaulToken;
 
 #[contractimpl]
-impl NavinToken {
+impl OrbitHaulToken {
     /// Initialize the token with admin, name, symbol, and total supply
     pub fn initialize(
         env: Env,

@@ -1,7 +1,7 @@
 //! # Token Compatibility Integration Suite
 //!
 //! Validates the shipment contract's escrow and payment flows against both
-//! Stellar Asset Contract (SAC) tokens and custom token contracts (NavinToken).
+//! Stellar Asset Contract (SAC) tokens and custom token contracts (OrbitHaulToken).
 #![allow(deprecated)]
 
 use crate::{
@@ -10,7 +10,7 @@ use crate::{
 use soroban_sdk::{testutils::Address as _, Address, BytesN, Env, IntoVal, Vec};
 
 // Import custom token client
-use navin_token::NavinTokenClient;
+use orbit_haul_token::OrbitHaulTokenClient;
 
 /// Matrix of token variants to test against.
 #[derive(Clone, Copy)]
@@ -43,9 +43,9 @@ fn setup_test(variant: TokenVariant) -> TestContext {
                 .address()
         }
         TokenVariant::Custom => {
-            // Register NavinToken
-            let token_addr = env.register(navin_token::NavinToken, ());
-            let token_client = NavinTokenClient::new(&env, &token_addr);
+            // Register OrbitHaulToken
+            let token_addr = env.register(orbit_haul_token::OrbitHaulToken, ());
+            let token_client = OrbitHaulTokenClient::new(&env, &token_addr);
             token_client.initialize(
                 &admin,
                 &soroban_sdk::String::from_str(&env, "Navin Token"),
@@ -88,7 +88,7 @@ fn mint_tokens(ctx: &TestContext, to: &Address, amount: i128) {
             args.push_back(amount.into_val(&ctx.env));
         }
         TokenVariant::Custom => {
-            // NavinToken mint(admin, to, amount)
+            // OrbitHaulToken mint(admin, to, amount)
             args.push_back(ctx.admin.clone().into_val(&ctx.env));
             args.push_back(to.clone().into_val(&ctx.env));
             args.push_back(amount.into_val(&ctx.env));
