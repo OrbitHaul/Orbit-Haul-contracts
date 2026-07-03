@@ -54,8 +54,10 @@ jobs:
           toolchain: stable
           target: wasm32-unknown-unknown
 
-      - name: Run tests
-        run: cargo test -- --test-threads=1 --nocapture
+      - name: Run token tests
+        run: cargo test --package orbit-haul-token -- --test-threads=1 --nocapture
+      - name: Run shipment tests
+        run: cargo test --package shipment -- --test-threads=1 --nocapture
 
   cargo-build:
     name: Cargo Build (Host)
