@@ -314,11 +314,10 @@ fn test_allowlist_updates_reflected_immediately() {
 
     // But setting new value should fail
     let new_value = String::from_str(&env, "@newnavin");
-    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-        client.set_metadata(&admin, &key, &new_value);
-    }));
+    // Verify that setting metadata with a disallowed key returns an error
+    let try_result = client.try_set_metadata(&admin, &key, &new_value);
     assert!(
-        result.is_err(),
+        try_result.is_err(),
         "Should fail after key removed from allowlist"
     );
 }

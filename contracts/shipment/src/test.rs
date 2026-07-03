@@ -5052,10 +5052,7 @@ fn test_proposal_expiration() {
     super::test_utils::advance_past_multisig_expiry(&env);
 
     // Try to approve expired proposal - should fail
-    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-        client.approve_action(&admin2, &proposal_id);
-    }));
-
+    let result = client.try_approve_action(&admin2, &proposal_id);
     assert!(result.is_err());
 }
 
@@ -9538,17 +9535,14 @@ fn test_suspended_role_cannot_perform_actions() {
     client.suspend_role(&admin, &company);
 
     // Suspended company cannot create shipment - should panic with Unauthorized
-    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-        client.create_shipment(
-            &company,
-            &receiver,
-            &carrier,
-            &data_hash,
-            &soroban_sdk::Vec::new(&env),
-            &deadline,
-        );
-    }));
-
+    let result = client.try_create_shipment(
+        &company,
+        &receiver,
+        &carrier,
+        &data_hash,
+        &soroban_sdk::Vec::new(&env),
+        &deadline,
+    );
     assert!(
         result.is_err(),
         "Suspended company should not be able to create shipments"
