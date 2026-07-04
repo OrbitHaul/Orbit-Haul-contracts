@@ -59,7 +59,19 @@ jobs:
 
       - name: Run shipment tests
         run: |
-          cargo test --package shipment -- --test-threads=1 --nocapture 2>&1
+          set -o pipefail
+          # List all tests first
+          cargo test --package shipment -- --list 2>&1 | grep ': test' | awk '{print $1}' | sed 's/:$//' > /tmp/test_list.txt
+          echo "Total tests: $(wc -l < /tmp/test_list.txt)"
+          # Run all tests together (captures stdout/stderr for the log)
+          cargo test --package shipment -- --test-threads=1 2>&1
+          STATUS=$?
+          if [ $STATUS -ne 0 ]; then
+            echo "=== Tests that FAILED ==="
+            # Re-run and grep for FAILED lines
+            cargo test --package shipment -- --test-threads=1 2>&1 | grep -E "FAILED|panicked|error\[" | head -20
+          fi
+          exit $STATUS
 
   cargo-build:
     name: Cargo Build (Host)
