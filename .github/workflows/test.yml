@@ -58,20 +58,22 @@ jobs:
         run: cargo test --package orbit-haul-token -- --test-threads=1
 
       - name: Run shipment tests
+        id: run_tests
         run: |
-          set -o pipefail
-          # List all tests first
-          cargo test --package shipment -- --list 2>&1 | grep ': test' | awk '{print $1}' | sed 's/:$//' > /tmp/test_list.txt
-          echo "Total tests: $(wc -l < /tmp/test_list.txt)"
-          # Run all tests together (captures stdout/stderr for the log)
-          cargo test --package shipment -- --test-threads=1 2>&1
-          STATUS=$?
-          if [ $STATUS -ne 0 ]; then
-            echo "=== Tests that FAILED ==="
-            # Re-run and grep for FAILED lines
-            cargo test --package shipment -- --test-threads=1 2>&1 | grep -E "FAILED|panicked|error\[" | head -20
-          fi
-          exit $STATUS
+          cargo test --package shipment -- --test-threads=1 --nocapture 2>&1 | tee /tmp/test_out.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+
+      - name: Save test output as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-output
+          path: /tmp/test_out.txt
+          retention-days: 1
+
+      - name: Fail if tests failed
+        if: steps.run_tests.outputs.exit_code != '0'
+        run: exit 1
 
   cargo-build:
     name: Cargo Build (Host)
