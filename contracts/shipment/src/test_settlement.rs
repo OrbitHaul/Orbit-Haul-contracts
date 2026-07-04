@@ -425,7 +425,7 @@ fn test_multiple_shipments_independent_settlements() {
     );
 
     // Advance ledger between creates to clear rate-limit windows
-    env.ledger().with_mut(|li| li.sequence_number += 1);
+    crate::test_utils::advance_ledger_sequence(&env, 1);
 
     let shipment_id2 = client.create_shipment(
         &company,
