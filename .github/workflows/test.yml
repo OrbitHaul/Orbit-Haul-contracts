@@ -58,7 +58,17 @@ jobs:
         run: cargo test --package orbit-haul-token -- --test-threads=1
 
       - name: Run shipment tests
-        run: cargo test --package shipment -- --test-threads=1 --nocapture
+        run: |
+          set +e
+          cargo test --package shipment -- --test-threads=1 2>&1 | tee /tmp/test_output.txt
+          EXIT_CODE=${PIPESTATUS[0]}
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "=== FAILING TESTS ==="
+            grep -E "^test .* FAILED|^FAILED|panicked at|thread .* panicked" /tmp/test_output.txt | head -30
+            echo "=== LAST 50 LINES ==="
+            tail -50 /tmp/test_output.txt
+          fi
+          exit $EXIT_CODE
 
   cargo-build:
     name: Cargo Build (Host)
