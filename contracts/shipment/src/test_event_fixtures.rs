@@ -33,7 +33,6 @@ use soroban_sdk::{
     token::StellarAssetClient,
     Address, BytesN, Env, Symbol, TryFromVal, TryIntoVal, Vec,
 };
-use std::string::ToString;
 
 // ── Minimal no-op token for replay tests ─────────────────────────────────────
 
@@ -84,7 +83,6 @@ fn fixture_env() -> (
 /// Collect all emitted event topics as strings.
 #[allow(dead_code)]
 fn topics_emitted(env: &Env) -> std::vec::Vec<std::string::String> {
-    use std::string::ToString;
     env.events()
         .all()
         .into_iter()
