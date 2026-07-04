@@ -82,6 +82,7 @@ fn fixture_env() -> (
 }
 
 /// Collect all emitted event topics as strings.
+#[allow(dead_code)]
 fn topics_emitted(env: &Env) -> std::vec::Vec<std::string::String> {
     use std::string::ToString;
     env.events()
