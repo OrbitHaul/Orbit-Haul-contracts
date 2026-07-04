@@ -4,6 +4,7 @@ use crate::types::*;
 use soroban_sdk::testutils::Address as _;
 use soroban_sdk::{Address, BytesN, Env};
 
+#[allow(dead_code)]
 fn seeded_hash(env: &Env, seed: u8) -> BytesN<32> {
     let mut bytes = [1u8; 32];
     bytes[31] = seed;
