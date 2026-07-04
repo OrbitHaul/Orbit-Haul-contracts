@@ -2779,12 +2779,11 @@ fn test_record_milestones_batch_oversized() {
     });
 
     // Create batch with 11 milestones (exceeds limit)
-    // Use 10-char base name so all symbols (milestone_00..milestone_10) stay <= 12 chars
     let mut milestones = soroban_sdk::Vec::new(&env);
-    for i in 0..11u8 {
+    for i in 0..11 {
         milestones.push_back((
-            Symbol::new(&env, &std::format!("ms_{:02}", i)),
-            BytesN::from_array(&env, &[i; 32]),
+            Symbol::new(&env, &std::format!("checkpoint_{i}")),
+            BytesN::from_array(&env, &[i as u8; 32]),
         ));
     }
 
