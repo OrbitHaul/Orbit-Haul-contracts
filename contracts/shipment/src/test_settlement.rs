@@ -95,7 +95,8 @@ fn test_deposit_escrow_settlement_failure() {
     let result = client.try_deposit_escrow(&company, &shipment_id, &escrow_amount);
     assert!(result.is_err());
 
-    // Soroban reverts all state on contract error, so no settlement is persisted.
+    // deposit_escrow returns Err when token fails, so Soroban reverts ALL state including
+    // any settlement records that were created. settlement_count remains 0.
     let settlement_count = client.get_settlement_count();
     assert_eq!(settlement_count, 0);
 
@@ -250,7 +251,8 @@ fn test_refund_escrow_settlement_failure() {
     let result = client.try_refund_escrow(&company, &shipment_id);
     assert!(result.is_err());
 
-    // Soroban reverts all state on contract error, so no settlement is persisted.
+    // refund_escrow returns Err when token fails, so Soroban reverts ALL state including
+    // any settlement records that were created. settlement_count remains 0.
     let settlement_count = client.get_settlement_count();
     assert_eq!(settlement_count, 0);
 

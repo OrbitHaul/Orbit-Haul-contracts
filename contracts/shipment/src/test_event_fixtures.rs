@@ -650,21 +650,37 @@ fn test_all_fixtures_emit_expected_topics() {
 
     client.raise_dispute(&company, &shipment_id, &data_hash);
 
-    // Collect ALL events after all operations (env.events().all() is cumulative)
-    let found = topics_emitted(&env);
+    // Check events directly by comparing Symbol values (avoids Symbol::to_string issues
+    // with long symbols like "shipment_created" which is > 9 chars)
+    let all_events = env.events().all();
 
-    assert!(
-        found.contains(&crate::event_topics::SHIPMENT_CREATED.to_string()),
-        "shipment_created not emitted"
-    );
-    assert!(
-        found.contains(&crate::event_topics::DISPUTE_RAISED.to_string()),
-        "dispute_raised not emitted"
-    );
-    assert!(
-        found.contains(&crate::event_topics::ESCROW_FROZEN.to_string()),
-        "escrow_frozen not emitted"
-    );
+    let shipment_created_sym = Symbol::new(&env, crate::event_topics::SHIPMENT_CREATED);
+    let dispute_raised_sym = Symbol::new(&env, crate::event_topics::DISPUTE_RAISED);
+    let escrow_frozen_sym = Symbol::new(&env, crate::event_topics::ESCROW_FROZEN);
+
+    let mut found_created = false;
+    let mut found_dispute = false;
+    let mut found_frozen = false;
+
+    for (_contract, topics, _data) in all_events.iter() {
+        if let Some(v) = topics.get(0) {
+            if let Ok(sym) = Symbol::try_from_val(&env, &v) {
+                if sym == shipment_created_sym {
+                    found_created = true;
+                }
+                if sym == dispute_raised_sym {
+                    found_dispute = true;
+                }
+                if sym == escrow_frozen_sym {
+                    found_frozen = true;
+                }
+            }
+        }
+    }
+
+    assert!(found_created, "shipment_created not emitted");
+    assert!(found_dispute, "dispute_raised not emitted");
+    assert!(found_frozen, "escrow_frozen not emitted");
 }
 
 // ── #299-12: payload shapes are stable (regression guard) ────────────────────
