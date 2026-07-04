@@ -58,7 +58,7 @@ jobs:
         run: cargo test --package orbit-haul-token -- --test-threads=1
 
       - name: Run shipment tests
-        run: cargo test --package shipment -- --test-threads=1
+        run: cargo test --package shipment -- --test-threads=1 --nocapture
 
   cargo-build:
     name: Cargo Build (Host)
