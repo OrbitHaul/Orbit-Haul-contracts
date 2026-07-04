@@ -63,21 +63,18 @@ jobs:
           cargo test --package shipment -- --test-threads=1 --nocapture 2>&1 | tee /tmp/test_out.txt
           echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
 
-      - name: Save test output to repo-readable location
+      - name: Save test output to cargo.log
         if: always()
         run: |
-          # Extract just the key lines (last 200 lines contain the failures)
-          tail -200 /tmp/test_out.txt > /tmp/test_failures.txt
-          echo "---GREP---" >> /tmp/test_failures.txt
-          grep -E "FAILED|panicked|---- " /tmp/test_out.txt >> /tmp/test_failures.txt || true
-          
-          # Commit the test output file to the repo
-          git config user.email "ci@orbithaul.io"
-          git config user.name "OrbitHaul CI"
-          cp /tmp/test_failures.txt ci_test_output.txt
-          git add ci_test_output.txt
-          git commit -m "ci: save test failures output [skip ci]" || echo "No changes"
-          git push origin HEAD:main || echo "Push failed"
+          if [ -f /tmp/test_out.txt ]; then
+            git config user.email "ci@orbithaul.io"
+            git config user.name "OrbitHaul CI"
+            cp /tmp/test_out.txt cargo.log
+            git add cargo.log
+            git diff --staged --quiet || git commit -m "ci: update cargo.log [skip ci]"
+            git pull --rebase origin main || true
+            git push origin HEAD:main || true
+          fi
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
