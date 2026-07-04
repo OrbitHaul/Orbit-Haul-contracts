@@ -647,10 +647,11 @@ fn test_all_fixtures_emit_expected_topics() {
         &Vec::new(&env),
         &deadline,
     );
-    let mut found = topics_emitted(&env);
 
     client.raise_dispute(&company, &shipment_id, &data_hash);
-    found.extend(topics_emitted(&env));
+
+    // Collect ALL events after all operations (env.events().all() is cumulative)
+    let found = topics_emitted(&env);
 
     assert!(
         found.contains(&crate::event_topics::SHIPMENT_CREATED.to_string()),

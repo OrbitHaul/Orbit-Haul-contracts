@@ -94,14 +94,17 @@ fn test_deposit_escrow_settlement_failure() {
     let result = client.try_deposit_escrow(&company, &shipment_id, &escrow_amount);
     assert!(result.is_err());
 
-    // On Soroban, the failed call is reverted atomically, so no settlement is persisted.
-    // Verify settlement was NOT created (transaction rolled back)
-    // Soroban reverts all state when a contract call panics/errors,
-    // so no settlement record is persisted.
+    // The contract uses try-invoke for token calls, so state is NOT atomically reverted.
+    // A settlement record IS created but in a Failed state.
     let settlement_count = client.get_settlement_count();
-    assert_eq!(settlement_count, 0);
+    assert_eq!(settlement_count, 1);
 
-    // Verify no active settlement
+    // The failed settlement should be in Failed state
+    let settlement = client.get_settlement(&1);
+    assert_eq!(settlement.state, SettlementState::Failed);
+    assert!(settlement.error_code.is_some());
+
+    // Verify no ACTIVE settlement (it's in Failed state, not active)
     let active = client.get_active_settlement(&shipment_id);
     assert!(active.is_none());
 }
@@ -252,16 +255,14 @@ fn test_refund_escrow_settlement_failure() {
     let result = client.try_refund_escrow(&company, &shipment_id);
     assert!(result.is_err());
 
-    // On Soroban, the failed call is reverted atomically, so no settlement is persisted.
+    // The contract uses try-invoke for token calls, so state is NOT atomically reverted.
+    // A settlement record IS created but in a Failed state.
     let settlement_count = client.get_settlement_count();
-    assert_eq!(settlement_count, 0);
+    assert_eq!(settlement_count, 1);
 
-    // Verify no active settlement remains
-    // Verify settlement was NOT created (transaction rolled back)
-    // Soroban reverts all state when a contract call panics,
-    // so no settlement record is persisted.
-    let settlement_count = client.get_settlement_count();
-    assert_eq!(settlement_count, 0);
+    let settlement = client.get_settlement(&1);
+    assert_eq!(settlement.state, SettlementState::Failed);
+    assert!(settlement.error_code.is_some());
 
     // Verify no active settlement
     let active = client.get_active_settlement(&shipment_id);
@@ -436,7 +437,7 @@ fn test_multiple_shipments_independent_settlements() {
         &company,
         &receiver,
         &carrier,
-        &seeded_hash(&env, 2),
+        &BytesN::from_array(&env, &[2u8; 32]),
         &soroban_sdk::Vec::new(&env),
         &deadline,
     );

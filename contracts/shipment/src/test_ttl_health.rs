@@ -24,12 +24,13 @@ fn setup_shipment_env() -> (Env, OrbitHaulShipmentClient<'static>, Address, Addr
     let cid = env.register(OrbitHaulShipment, ());
     let client = OrbitHaulShipmentClient::new(&env, &cid);
 
-    // Extend contract instance TTL immediately after registration to a huge value
+    client.initialize(&admin, &token);
+
+    // Extend contract instance TTL after initialization
     env.as_contract(&cid, || {
         env.storage().instance().extend_ttl(500000, 500000);
     });
 
-    client.initialize(&admin, &token);
     (env, client, admin, token)
 }
 
