@@ -54,38 +54,11 @@ jobs:
           toolchain: stable
           target: wasm32-unknown-unknown
 
-      - name: Run core tests
-        continue-on-error: true
-        run: cargo test --package shipment test:: -- --test-threads=1 2>&1 | tail -20
-      - name: Run e2e tests
-        continue-on-error: true
-        run: cargo test --package shipment e2e_test:: -- --test-threads=1 2>&1 | tail -20
-      - name: Run replay protection tests
-        continue-on-error: true
-        run: cargo test --package shipment actor_quota_tests:: -- --test-threads=1 2>&1 | tail -20
-      - name: Run performance tests
-        continue-on-error: true
-        run: cargo test --package shipment test_performance:: -- --test-threads=1 2>&1 | tail -20
-      - name: Run consistency tests
-        continue-on-error: true
-        run: cargo test --package shipment test_consistency:: -- --test-threads=1 2>&1 | tail -20
-      - name: Run event fixture tests
-        continue-on-error: true
-        run: cargo test --package shipment test_event_fixtures:: -- --test-threads=1 2>&1 | tail -20
-      - name: Run reentrancy tests
-        continue-on-error: true
-        run: cargo test --package shipment test_reentrancy_guard:: -- --test-threads=1 2>&1 | tail -20
-      - name: Run cross-contract tests
-        continue-on-error: true
-        run: cargo test --package shipment test_cross_contract_integration:: -- --test-threads=1 2>&1 | tail -20
-      - name: Run mixed token tests
-        continue-on-error: true
-        run: cargo test --package shipment test_mixed_token_shipments:: -- --test-threads=1 2>&1 | tail -20
-      - name: Run token compatibility tests
-        continue-on-error: true
-        run: cargo test --package shipment test_token_compatibility:: -- --test-threads=1 2>&1 | tail -20
-      - name: Run all remaining tests (FINAL)
-        run: cargo test --package shipment -- --test-threads=1 2>&1 | tail -30
+      - name: Run orbit-haul-token tests
+        run: cargo test --package orbit-haul-token -- --test-threads=1
+
+      - name: Run shipment tests
+        run: cargo test --package shipment -- --test-threads=1
 
   cargo-build:
     name: Cargo Build (Host)
