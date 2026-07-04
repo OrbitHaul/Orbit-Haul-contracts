@@ -90,7 +90,7 @@ fn topics_emitted(env: &Env) -> std::vec::Vec<std::string::String> {
             topic
                 .get(0)
                 .and_then(|v| Symbol::try_from_val(env, &v).ok())
-                .map(|s| s.to_string())
+                .map(|s| std::string::ToString::to_string(&s))
         })
         .collect()
 }
