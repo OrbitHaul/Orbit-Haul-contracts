@@ -95,17 +95,11 @@ fn test_deposit_escrow_settlement_failure() {
     let result = client.try_deposit_escrow(&company, &shipment_id, &escrow_amount);
     assert!(result.is_err());
 
-    // The contract uses try-invoke for token calls, so state is NOT atomically reverted.
-    // A settlement record IS created but in a Failed state.
+    // Soroban reverts all state on contract error, so no settlement is persisted.
     let settlement_count = client.get_settlement_count();
-    assert_eq!(settlement_count, 1);
+    assert_eq!(settlement_count, 0);
 
-    // The failed settlement should be in Failed state
-    let settlement = client.get_settlement(&1);
-    assert_eq!(settlement.state, SettlementState::Failed);
-    assert!(settlement.error_code.is_some());
-
-    // Verify no ACTIVE settlement (it's in Failed state, not active)
+    // Verify no active settlement
     let active = client.get_active_settlement(&shipment_id);
     assert!(active.is_none());
 }
@@ -256,14 +250,9 @@ fn test_refund_escrow_settlement_failure() {
     let result = client.try_refund_escrow(&company, &shipment_id);
     assert!(result.is_err());
 
-    // The contract uses try-invoke for token calls, so state is NOT atomically reverted.
-    // A settlement record IS created but in a Failed state.
+    // Soroban reverts all state on contract error, so no settlement is persisted.
     let settlement_count = client.get_settlement_count();
-    assert_eq!(settlement_count, 1);
-
-    let settlement = client.get_settlement(&1);
-    assert_eq!(settlement.state, SettlementState::Failed);
-    assert!(settlement.error_code.is_some());
+    assert_eq!(settlement_count, 0);
 
     // Verify no active settlement
     let active = client.get_active_settlement(&shipment_id);
@@ -421,10 +410,11 @@ fn test_multiple_shipments_independent_settlements() {
     client.add_carrier(&admin, &carrier);
     client.add_carrier_to_whitelist(&company, &carrier);
 
-    let data_hash1 = BytesN::from_array(&env, &[1u8; 32]);
+    let data_hash1 = seeded_hash(&env, 1);
+    let data_hash2 = seeded_hash(&env, 2);
     let deadline = env.ledger().timestamp() + 86400;
 
-    // Use distinct data hashes so the idempotency check treats them as separate operations.
+    // Use distinct seeded hashes so the idempotency check treats them as separate operations.
     let shipment_id1 = client.create_shipment(
         &company,
         &receiver,
@@ -434,11 +424,14 @@ fn test_multiple_shipments_independent_settlements() {
         &deadline,
     );
 
+    // Advance ledger between creates to clear rate-limit windows
+    env.ledger().with_mut(|li| li.sequence_number += 1);
+
     let shipment_id2 = client.create_shipment(
         &company,
         &receiver,
         &carrier,
-        &BytesN::from_array(&env, &[2u8; 32]),
+        &data_hash2,
         &soroban_sdk::Vec::new(&env),
         &deadline,
     );
